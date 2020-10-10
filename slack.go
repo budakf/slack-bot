@@ -1,11 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"io/ioutil"
-	"encoding/json"
+
 	"golang.org/x/net/websocket"
 )
 
@@ -14,24 +15,22 @@ const (
 	slackApi    = "https://api.slack.com/"
 )
 
-type self struct{
+type self struct {
 	Id string `json:"id"`
 }
 
 type resObject struct {
-	Ok    	string 	`json:"ok"`
-	Error 	string 	`json:"error"`
-	Url   	string 	`json:"url"`
-	SelfId  self 	`json:"self"`
+	Ok     string `json:"ok"`
+	Error  string `json:"error"`
+	Url    string `json:"url"`
+	SelfId self   `json:"self"`
 }
 
 type message struct {
-	Channel	string 	`json:"channel"`
-	Text	string 	`json:"text"`
-	Type	string 	`json:"type"`
+	Channel string `json:"channel"`
+	Text    string `json:"text"`
+	Type    string `json:"type"`
 }
-
-
 
 func getMessage(ws *websocket.Conn) (msg message, err error) {
 	err = websocket.JSON.Receive(ws, &msg)
@@ -43,24 +42,24 @@ func sendMessage(ws *websocket.Conn, msg message) (err error) {
 	return
 }
 
-func getWsUrlFromSlack(slackRtmUrl, token string) ( wsUrl, id string, err error) {
-	
+func getWsUrlFromSlack(slackRtmUrl, token string) (wsUrl, id string, err error) {
+
 	url := fmt.Sprintf(slackRtmUrl, token)
 	res, err := http.Get(url)
-	if err != nil{
-		return 
+	if err != nil {
+		return
 	}
 
 	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil{
-		return 
+	if err != nil {
+		return
 	}
 
 	var resObj resObject
 	json.Unmarshal(resBody, &resObj)
 	wsUrl = resObj.Url
 	id = resObj.SelfId.Id
-	return 
+	return
 }
 
 func connectToSlackRtmApi(token string) (ws *websocket.Conn, id string) {
@@ -77,4 +76,3 @@ func connectToSlackRtmApi(token string) (ws *websocket.Conn, id string) {
 
 	return
 }
-
