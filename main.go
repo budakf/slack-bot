@@ -22,6 +22,8 @@ func main() {
 		if msg.Type == "message" {
 			if strings.HasPrefix(msg.Text, "binance") {
 				binance(&msg)
+			} else {
+				msg.Text = "Please enter any appropriate command\ne.g. \"binance BTCUSDT\""
 			}
 			sendMessage(ws, msg)
 		}
